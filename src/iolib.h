@@ -26,6 +26,7 @@ struct IO_s
 {
 	enum	IOState_e state;
 	char*	buffer;
+	int	buffer_sz;
 	void*	rsrc;
 	enum ItemIOType_e type;
 

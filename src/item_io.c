@@ -58,6 +58,7 @@ int item_file_open(IO_t* io, char *filename)
 
 	lprintf(LL_DEBUG, "Opening file IO: %s", filename);
 
+	io->buffer_sz = f_sz;
 	io->state = IO_OPEN;
 
 	return 0;
@@ -94,17 +95,24 @@ int item_file_save(IO_t* io)
 
 void item_file_parse_buffer(IO_t* io)
 {
-	char id[255];
-	char name[255];
-	char property[255];
+	char line[2048];
+	int i;
+	int read;
 
-	memset(id, '\0', 255);
-	memset(name, '\0', 255);
-	memset(property, '\0', 255);
+	read = 0;
 
-	sscanf(io->buffer, "%s%s%s\n", id, name, property);
+	while (1)
+	{
+		memset(line, '\0', 2048);
+		sscanf(io->buffer + read, "%s\n%n", line, &i);
 
-	lprintf(LL_DEBUG, "parse: %s ; %s ; %s", id, name, property);
+		read_tot += i;
+
+		lprintf(LL_DEBUG, "parse: %s, bytes read %d, io buf sz %d", line, read, io->buffer_sz);
+
+		if (read == io->buffer_sz)
+			break;
+	}
 }
 
 void item_file_close(IO_t* io)
