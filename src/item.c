@@ -15,9 +15,15 @@ Item_t* item_new(enum ItemIOType_e io_type)
 	return it;
 }
 
-void item_open(Item_t* it, char *name)
+int item_open(Item_t* it, char *name)
 {
-	it->io->lib->io_open(it->io, name);
+	return it->io->lib->io_open(it->io, name);
+}
+
+void item_print_buffer(Item_t* it)
+{
+//	item_file_print(it->io);
+	item_file_parse_buffer(it->io);
 }
 
 void item_load(Item_t* it, char* id)
@@ -30,7 +36,7 @@ void item_save(Item_t* it)
 	it->io->lib->io_save(it->io);
 }
 
-void item_Close(Item_t* it)
+void item_close(Item_t* it)
 {
 	it->io->lib->io_close(it->io);
 }

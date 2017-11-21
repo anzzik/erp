@@ -5,13 +5,22 @@
 
 int main(int argc, char** argv)
 {
+	int r;
+
 	log_add(LL_DEBUG, "debug.log");
 
 	Item_t* item = item_new(IOTYPE_FILEFORMAT);
 
-	item_open(item, "testfile.txt");
-	item_open(item, "testfile2.txt");
-//	item_load(item, "JJ");
+	r = item_open(item, "item.dat");
+	if (r < 0)
+	{
+		lprintf(LL_ERROR, "item_open failed");
+
+		return -1;
+	}
+	
+	item_print_buffer(item);
+	item_close(item);
 
 	log_quit();
 

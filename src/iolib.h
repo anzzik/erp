@@ -27,6 +27,7 @@ struct IO_s
 	enum	IOState_e state;
 	char*	buffer;
 	void*	rsrc;
+	enum ItemIOType_e type;
 
 	IOLib_t *lib;
 };

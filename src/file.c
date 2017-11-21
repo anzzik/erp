@@ -8,7 +8,9 @@
 
 File_t* file_new()
 {
-	File_t* f = malloc(sizeof(File_t));
+	File_t* f;
+       
+	f = malloc(sizeof(File_t));
 
 	f->size = 0;
 	f->filename = 0;
@@ -59,7 +61,12 @@ int file_get_size(File_t* f)
 	return f->size;
 }
 
-void file_save(File_t* f)
+char* file_get_name(File_t* f)
+{
+	return f->filename;
+}
+
+void file_save(File_t* f, char *buffer, int n)
 {
 
 }
