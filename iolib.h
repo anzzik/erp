@@ -1,18 +1,36 @@
 #ifndef IOLIB_H
 #define IOLIB_H
 
+enum IOState_e
+{
+	IO_CLOSED = 0,
+	IO_OPEN
+};
+
 enum ItemIOType_e
 {
-	FILEFORMAT = 0,
+	IOTYPE_FILEFORMAT = 0,
 };
 
 typedef struct IOLib_s IOLib_t;
-
 struct IOLib_s
 {
-	void (*io_open)();
-	void (*io_load)();
-	void (*io_save)();
+	int  (*io_open)();
+	int (*io_load)();
+	int (*io_save)();
+	void (*io_close)();
 };
+
+typedef struct IO_s IO_t;
+struct IO_s
+{
+	enum	IOState_e state;
+	char*	buffer;
+	void*	rsrc;
+
+	IOLib_t *lib;
+};
+
+IO_t* io_new();
 
 #endif // IOLIB_H

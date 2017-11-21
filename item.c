@@ -3,27 +3,40 @@
 #include "item.h"
 #include "item_io.h"
 
-Item_t* item_new(enum ItemIOType_e io_t)
+Item_t* item_new(enum ItemIOType_e io_type)
 {
-	Item_t *it = malloc(sizeof(Item_t));
+	Item_t *it;
 
-	item_set_iolib(it->io, io_t);
-	it->io_t = io_t;
+	it = malloc(sizeof(Item_t));
+	it->io = io_new();
+
+	item_set_io(it->io, io_type);
 
 	return it;
 }
 
-void item_load(Item_t* it)
+void item_open(Item_t* it, char *name)
 {
-	it->io->io_load();
+	it->io->lib->io_open(it->io, name);
+}
+
+void item_load(Item_t* it, char* id)
+{
+	it->io->lib->io_load(it->io);
 }
 
 void item_save(Item_t* it)
 {
-	it->io->io_save();
+	it->io->lib->io_save(it->io);
+}
+
+void item_Close(Item_t* it)
+{
+	it->io->lib->io_close(it->io);
 }
 
 void item_free(Item_t* it)
 {
 	free(it);
 }
+
