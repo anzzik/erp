@@ -106,12 +106,85 @@ void item_file_parse_buffer(IO_t* io)
 		memset(line, '\0', 2048);
 		sscanf(io->buffer + read, "%s\n%n", line, &i);
 
-		read_tot += i;
+		read += i;
 
-		lprintf(LL_DEBUG, "parse: %s, bytes read %d, io buf sz %d", line, read, io->buffer_sz);
+		item_file_parse_line(line);
 
 		if (read == io->buffer_sz)
 			break;
+	}
+}
+
+void item_file_parse_line(char *line)
+{
+	int i;
+	int j;
+	int esc;
+	int quote;
+	char field[256];
+
+	memset(field, '\0', 256);
+
+	i = 0;
+	j = 0;
+	esc = 0;
+	quote = 0;
+
+	while (1)
+	{
+		if (esc == 0 && line[i] == '\\')
+		{
+			esc = 1;
+			i++;
+
+			continue;
+		}
+
+		if (esc == 1)
+		{
+			field[j] = line[i];
+			esc = 0;
+		}
+
+		if (line[i] == '"')
+		{
+			if (quote == 0)
+			{
+				quote = 1;
+
+				i++;
+
+				continue;
+			}
+			else
+			{
+				quote = 0;
+
+				i++;
+
+				continue;
+			}
+		}
+
+		if (line[i] == ';' || line[i] == '\0')
+		{
+			field[j] = '\0';
+			lprintf(LL_DEBUG, "Parsed field: %s", field);
+
+			j = 0;
+			memset(field, '\0', 256);
+
+			if (line[i] == '\0')
+			{
+				break;
+			}
+
+			i++;
+
+			continue;
+		}
+
+		field[j++] = line[i++];
 	}
 }
 
