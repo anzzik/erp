@@ -7,32 +7,34 @@ enum IOState_e
 	IO_OPEN
 };
 
-enum ItemIOType_e
+enum IOType_e
 {
-	IOTYPE_FILEFORMAT = 0,
-};
-
-typedef struct IOLib_s IOLib_t;
-struct IOLib_s
-{
-	int  (*io_open)();
-	int (*io_load)();
-	int (*io_save)();
-	void (*io_close)();
+	IO_FILEFORMAT = 0,
 };
 
 typedef struct IO_s IO_t;
+typedef struct IOLib_s IOLib_t;
+
 struct IO_s
 {
 	enum	IOState_e state;
 	char*	buffer;
 	int	buffer_sz;
 	void*	rsrc;
-	enum ItemIOType_e type;
+	enum 	IOType_e type;
 
 	IOLib_t *lib;
 };
 
+struct IOLib_s
+{
+	int  (*io_open)(IO_t *io, void *ptr, char *filename);
+	int  (*io_read)(IO_t *io, void *ptr);
+	int  (*io_write)(IO_t *io, void *ptr);
+	int  (*io_close)(IO_t *io, void *ptr);
+};
+
 IO_t* io_new();
+IOLib_t* iolib_new();
 
 #endif // IOLIB_H

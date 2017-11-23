@@ -47,7 +47,8 @@ void log_f(const char* filename, int linenumber, LogLevel_t level, const char* f
 		c = llc[i];
 		while (c)
 		{
-			fprintf(c->fp, "%s %s:%d %s\n", ts, filename, linenumber, buffer);
+//			fprintf(c->fp, "%s %s:%d %s\n", ts, filename, linenumber, buffer);
+			printf("%s %s:%d %s\n", ts, filename, linenumber, buffer);
 			fflush(c->fp);
 			c = c->prev;
 		}

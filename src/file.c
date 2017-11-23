@@ -56,6 +56,21 @@ int file_read(File_t* f, char* buffer, int n)
 	return r;
 }
 
+int file_write(File_t *f, char *buffer, int n)
+{
+	int r;
+
+	r = fwrite(buffer, 1, n, f->fp);
+	if (r != n)
+	{
+		lprintf(LL_ERROR, "Error in fwrite, filename: %s", f->filename);
+
+		return -1;
+	}
+
+	return r;
+}
+
 int file_get_size(File_t* f)
 {
 	return f->size;
@@ -64,11 +79,6 @@ int file_get_size(File_t* f)
 char* file_get_name(File_t* f)
 {
 	return f->filename;
-}
-
-void file_save(File_t* f, char *buffer, int n)
-{
-
 }
 
 void file_close(File_t* f)
@@ -80,3 +90,4 @@ void file_free(File_t* f)
 {
 	free(f);
 }
+

@@ -14,8 +14,10 @@ sources = \
 	log.c \
 	file.c \
 	item.c \
-	item_io.c \
 	iolib.c \
+	database.c \
+	database_file_io.c \
+	list.c \
 
 OBJS = $(sources:%.c=$(obj_dir)%.o)
 deps = $(sources:%.c=$(deps_dir)%.d)
