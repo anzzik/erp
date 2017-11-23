@@ -18,6 +18,7 @@ sources = \
 	database.c \
 	database_file_io.c \
 	list.c \
+	csv.c \
 
 OBJS = $(sources:%.c=$(obj_dir)%.o)
 deps = $(sources:%.c=$(deps_dir)%.d)

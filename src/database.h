@@ -27,7 +27,7 @@ struct Database_s
 
 	List_t *table_head;
 
-	List_t *ls;
+	List_t ls;
 };
 
 struct DBTable_s
@@ -35,7 +35,7 @@ struct DBTable_s
 	char name[max_table_name_sz];
 	List_t *data_head;
 
-	List_t *ls;
+	List_t ls;
 };
 
 struct DBData_s
@@ -44,7 +44,7 @@ struct DBData_s
 	int sz;
 	void *data;
 
-	List_t *ls;
+	List_t ls;
 };
 
 Database_t* db_new();

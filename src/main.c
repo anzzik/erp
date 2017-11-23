@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "log.h"
+#include "csv.h"
 #include "iolib.h"
 #include "item.h"
 #include "list.h"
@@ -18,9 +19,29 @@ struct Test_s
 	List_t *ls;
 };
 
+void test(List_t* l)
+{
+	CSVLine_t *csvl;
+	int i;
+
+	csvl = list_get_entry(l, CSVLine_t, ls);
+
+	printf("Fields: ");
+
+	for (i = 0; i < csvl->fc; i++)
+	{
+		printf("%s, ", csvl->fields[i]);
+	}
+
+	printf("\n");
+}
+
 int main(int argc, char** argv)
 {
 	Database_t *db;
+	List_t *csv_head;
+
+	csv_head = list_new();
 
 	log_add(LL_DEBUG, "debug.log");
 
@@ -29,10 +50,13 @@ int main(int argc, char** argv)
 	db_open_io(db, "item.csv");
 	db_load_io(db);
 
-	db_process_io_buffer(db, db->io->buffer, db->io->buffer_sz);
+	csv_parse(db->io->buffer, db->io->buffer_sz, csv_head);
+
+	list_traverse(csv_head, test);
 
 	log_quit();
 
 	return 0;
 }
+
 

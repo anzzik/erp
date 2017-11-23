@@ -17,7 +17,6 @@ Database_t* db_new(enum IOType_e io_type)
 	db->iolib = iolib_new();
 
 	db->table_head = list_new();
-	db->ls = list_new();
 
 	switch (db->io->type)
 	{
@@ -168,7 +167,6 @@ DBTable_t* db_table_new(Database_t *db, char* name)
 
 	dbts = malloc(sizeof(DBTable_t));
 
-	dbts->ls = list_new();
 	dbts->data_head = list_new();
 
 	len = strlen(name);

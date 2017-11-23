@@ -18,14 +18,7 @@ List_t* list_new()
 void list_add(List_t* head, List_t *l)
 {
 	if (head->next != 0)
-	{
-		printf("need to fix head->next->prev\n");
 		head->next->prev = l;
-	}
-	else
-	{
-		printf("no need to fix head->next->prev\n");
-	}
 
 	l->next = head->next;
 	l->prev = head;
