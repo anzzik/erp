@@ -1,6 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
 
+#include <stddef.h>
+
 typedef struct List_s List_t;
 struct List_s
 {
@@ -8,9 +10,8 @@ struct List_s
 	List_t *prev;
 };
 
-#define CONTAINER(ptr, type, member) ({ \
-        const typeof(((type *)0)->member) *__mptr = (ptr); \
-        (type *)( (char *)__mptr - offsetof(type,member) );})
+#define CONTAINER(ptr, type, member) \
+	(type*)((char*)ptr - offsetof(type, member))
 
 #define list_get_entry(ptr, type, member) \
 	CONTAINER(ptr, type, member)

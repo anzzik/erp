@@ -5,7 +5,7 @@ bin_dir = $(root_dir)bin/
 binary = $(bin_dir)test
 
 CC = gcc
-CFLAGS = -O0 -g -Wall -D_GNU_SOURCE=1 -D_REENTRANT -I ./memory
+CFLAGS = -O0 -g -Wall -D_GNU_SOURCE=1 -D_REENTRANT
 LDFLAGS = 
 LIBS =
 
