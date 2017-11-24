@@ -157,7 +157,7 @@ int __db_process_io_entry(Database_t *db, char *entry, int n)
 
 void db_show_tables(Database_t *db)
 {
-	list_traverse(db->table_head, db_table_show_cb);
+	list_traverse(db->table_head, 0, db_table_show_cb);
 }
 
 DBTable_t* db_table_new(Database_t *db, char* name)
@@ -193,12 +193,14 @@ DBTable_t* db_table_list_entry(List_t *l)
        	return list_get_entry(l, DBTable_t, ls);
 }
 
-void db_table_show_cb(List_t *l)
+int db_table_show_cb(List_t *l)
 {
 	DBTable_t *dbts;
 
        	dbts = db_table_list_entry(l);
 
 	printf("table name: %s\n", dbts->name);
+
+	return 0;
 }
 

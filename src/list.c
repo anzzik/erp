@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "list.h"
+#include "log.h"
 
 List_t* list_new()
 {
@@ -33,14 +34,23 @@ void list_remove(List_t* head, List_t *l)
 	l->prev->next = l->next;
 }
 
-void list_traverse(List_t *head, void (*f_cb)(List_t*))
+int list_traverse(List_t *head, void *ptr, int (*f_cb)(List_t*, void*))
 {
-	List_t *it;
+	List_t *l;
+	int r;
 
-	for (it = head->next; it != 0; it = it->next)
+	for (l = head->next; l != 0; l = l->next)
 	{
-		f_cb(it);
+		r = f_cb(l, ptr);
+		if (r != 0)
+		{
+			lprintf(LL_ERROR, "list_traverse failed with error code %d", r);
+
+			return -1;
+		}
 	}
+
+	return 0;
 }
 
 List_t* list_get_first(List_t *head)

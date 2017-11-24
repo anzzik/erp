@@ -58,84 +58,79 @@ int csv_parse(char *buffer, int n, List_t *head)
 
 int csv_parse_line(char *line, int n, CSVLine_t *csvl)
 {
-	int i;
-	int j;
-	int k;
+	int line_c;
+	int word_c;
+	int field_c;
 	int esc;
 	int quote;
 	char *f;
 
-	f = malloc(n * sizeof(char));
+	line_c	= 0;
+	word_c	= 0;
+	field_c = 0;
+	esc	= 0;
+	quote	= 0;
 
-	memset(f, '\0', n);
-
-	i = 0;
-	j = 0;
-	k = 0;
-	esc = 0;
-	quote = 0;
+	f = calloc(1, n * sizeof(char));
 
 	while (1)
 	{
-		if (esc == 0 && line[i] == '\\')
+		if (esc == 0 && line[line_c] == '\\')
 		{
 			esc = 1;
-			i++;
+			line_c++;
 
 			continue;
 		}
 
 		if (esc == 1)
 		{
-			f[j] = line[i];
+			f[word_c] = line[line_c];
 			esc = 0;
 		}
 
-		if (line[i] == '"')
+		if (line[line_c] == '"')
 		{
 			if (quote == 0)
 			{
 				quote = 1;
-
-				i++;
+				line_c++;
 
 				continue;
 			}
 			else
 			{
 				quote = 0;
-
-				i++;
+				line_c++;
 
 				continue;
 			}
 		}
 
-		if (line[i] == ';' || line[i] == '\0')
+		if (quote == 0 && (line[line_c] == ';' || line[line_c] == '\0'))
 		{
-			f[j] = '\0';
-			lprintf(LL_DEBUG, "Parsed field: %s", f);
+			f[word_c] = '\0';
 
-			csvl->fields[k] = malloc(strlen(f) + 1);
-			memset(csvl->fields[k], '\0', strlen(f) + 1);
+			csvl->fields[field_c] = calloc(1, strlen(f) + 1);
 
-			strncpy(csvl->fields[k], f, strlen(f));
-			k++;
+			strncpy(csvl->fields[field_c], f, strlen(f));
+			field_c++;
 
-			j = 0;
+			word_c = 0;
 			memset(f, '\0', strlen(f) + 1);
 
-			if (line[i] == '\0')
-			{
+			if (line[line_c] == '\0')
 				break;
-			}
 
-			i++;
+			line_c++;
 
 			continue;
 		}
 
-		f[j++] = line[i++];
+		if (line[line_c] == '\0')
+			break;
+
+		f[word_c++] = line[line_c++];
 	}
 
 	free(f);

@@ -61,7 +61,7 @@ void db_show_tables(Database_t *db);
 DBTable_t*  db_table_new(Database_t *db, char *name);
 void 	    db_table_add(Database_t *db, DBTable_t *dbts);
 DBTable_t*  db_table_list_entry(List_t *l);
-void 	    db_table_show_cb(List_t *l);
+int 	    db_table_show_cb(List_t *l);
 
 #endif
 

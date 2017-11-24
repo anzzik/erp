@@ -19,29 +19,28 @@ struct Test_s
 	List_t *ls;
 };
 
-void test(List_t* l)
+int test(List_t* l, void* ptr)
 {
-	CSVLine_t *csvl;
-	int i;
+	Item_t *it;
 
-	csvl = list_get_entry(l, CSVLine_t, ls);
+	it = list_get_entry(l, Item_t, ls);
 
-	printf("Fields: ");
+	lprintf(LL_DEBUG, "Item:");
+	lprintf(LL_DEBUG, "Id: %s", it->id);
+	lprintf(LL_DEBUG, "Name: %s", it->name);
+	lprintf(LL_DEBUG, "Property: %s", it->property);
 
-	for (i = 0; i < csvl->fc; i++)
-	{
-		printf("%s, ", csvl->fields[i]);
-	}
-
-	printf("\n");
+	return 0;
 }
 
 int main(int argc, char** argv)
 {
 	Database_t *db;
 	List_t *csv_head;
+	List_t *item_head;
 
 	csv_head = list_new();
+	item_head = list_new();
 
 	log_add(LL_DEBUG, "debug.log");
 
@@ -52,7 +51,8 @@ int main(int argc, char** argv)
 
 	csv_parse(db->io->buffer, db->io->buffer_sz, csv_head);
 
-	list_traverse(csv_head, test);
+	list_traverse(csv_head, item_head, __item_import_csvdata_cb);
+	list_traverse(item_head, 0, test);
 
 	log_quit();
 
