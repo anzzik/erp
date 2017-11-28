@@ -84,10 +84,12 @@ char* file_get_name(File_t* f)
 void file_close(File_t* f)
 {
 	fclose(f->fp);
+	free(f->filename);
 }
 
 void file_free(File_t* f)
 {
+	file_close(f);
 	free(f);
 }
 

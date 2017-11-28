@@ -44,12 +44,27 @@ int main(int argc, char** argv)
 
 	log_add(LL_DEBUG, "debug.log");
 
-	db = db_new(IO_FILEFORMAT);
+	db = db_new();
 
-	db_open_io(db, "item.csv");
+	db_open_io(db, "table_def.csv", IO_FILEFORMAT);
 	db_load_io(db);
 
 	csv_parse(db->io->buffer, db->io->buffer_sz, csv_head);
+
+	list_traverse(csv_head, db, __db_import_csvdata_cb);
+
+	db_close_io(db);
+
+
+	list_empty(csv_head);
+
+
+	db_open_io(db, "item.csv", IO_FILEFORMAT);
+	db_load_io(db);
+
+	csv_parse(db->io->buffer, db->io->buffer_sz, csv_head);
+
+	db_close_io(db);
 
 	list_traverse(csv_head, item_head, __item_import_csvdata_cb);
 	list_traverse(item_head, 0, test);

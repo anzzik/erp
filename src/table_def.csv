@@ -1,0 +1,6 @@
+item;productcode;string;30
+item;productname;string;100
+item;inprice;fixed;32
+item;outprice;fixed;32
+item;category:int:32
+

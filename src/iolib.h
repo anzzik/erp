@@ -4,7 +4,8 @@
 enum IOState_e
 {
 	IO_CLOSED = 0,
-	IO_OPEN
+	IO_OPEN,
+	IO_FREED
 };
 
 enum IOType_e
@@ -36,5 +37,8 @@ struct IOLib_s
 
 IO_t* io_new();
 IOLib_t* iolib_new();
+
+void io_free_buffer(IO_t *io);
+void io_free(IO_t *io);
 
 #endif // IOLIB_H

@@ -34,6 +34,11 @@ void list_remove(List_t* head, List_t *l)
 	l->prev->next = l->next;
 }
 
+void list_empty(List_t *head)
+{
+	head->next = 0;
+}
+
 int list_traverse(List_t *head, void *ptr, int (*f_cb)(List_t*, void*))
 {
 	List_t *l;

@@ -58,5 +58,8 @@ int db_save_file(IO_t *io, void *db)
 
 int db_close_file(IO_t *io, void *db)
 {
+	file_free(io->rsrc);
+	io_free(io);
+
 	return 0;
 }
