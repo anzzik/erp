@@ -23,6 +23,7 @@ int csv_parse(char *buffer, int n, List_t *head)
 	char **fields;
 	CSVLine_t *csvl;
 	int i;
+	int r;
 	int read;
 	int fc;
 
@@ -43,7 +44,13 @@ int csv_parse(char *buffer, int n, List_t *head)
 		}
 
 		csvl = csv_new_line(fc);
-		csv_parse_line(line, i, csvl);
+		r = csv_parse_line(line, i, csvl);
+		if (r != fc)
+		{
+			lprintf(LL_ERROR, "Field count (%d) doesnt match in string %s", fc, line);
+
+			return -1;
+		}
 
 		list_add(head, &csvl->ls);
 
@@ -135,7 +142,7 @@ int csv_parse_line(char *line, int n, CSVLine_t *csvl)
 
 	free(f);
 
-	return 0;
+	return field_c;
 }
 
 int csv_get_field_count(char *line, int n, char delim)

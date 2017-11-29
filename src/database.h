@@ -33,6 +33,8 @@ struct Database_s
 struct DBTable_s
 {
 	char name[max_table_name_sz];
+	int cols;
+	List_t *ddef_head;
 	List_t *data_head;
 
 	List_t ls;
@@ -47,25 +49,33 @@ struct DBDataDef_s
 	List_t ls;
 };
 
+struct Data_s
+{
+	DBDataDef_t *ddef;
+	void *data;
+
+	List_t ls;
+};
+
 Database_t* db_new();
 
-int db_open_io(Database_t *db, char *name, enum IOType_e io_type);
-int db_load_io(Database_t *db);
-int db_save_io(Database_t *db);
-int db_close_io(Database_t *db);
-
-int db_process_io_buffer(Database_t *db, char *buffer, int n);
-int __db_process_io_entry(Database_t *db, char *entry, int n);
+int  db_open_io(Database_t *db, char *name, enum IOType_e io_type);
+int  db_load_io(Database_t *db);
+int  db_save_io(Database_t *db);
+int  db_close_io(Database_t *db);
 void db_show_tables(Database_t *db);
-
 void 	    db_add_table(Database_t *db, DBTable_t *dbts);
 DBTable_t*  db_get_table(Database_t *db, char *tablename);
-int	  __db_import_csvdata_cb(List_t* l, void* ptr);
+
+int	    db_csv_load_defs(Database_t *db, char *csvfile);
+int	  __db_csv_import_datadef_cb(List_t* l, void* ptr);
 
 DBTable_t*  db_table_new(Database_t *db, char *name);
 DBTable_t*  db_table_list_entry(List_t *l);
 int 	    db_table_show_cb(List_t *l, void *ptr);
 void	    db_table_add_datadef(DBTable_t *dbt, DBDataDef_t *dbd);
+int	    db_table_csv_fill(Database_t *db, char *tablename, char *csvfile);
+int	  __db_table_csv_import_data_cb(List_t* l, void* ptr);
 
 DBDataDef_t*   db_datadef_new(char *name, int data_sz);
 

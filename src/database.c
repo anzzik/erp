@@ -11,8 +11,6 @@ Database_t* db_new()
 	Database_t *db;
 
 	db = malloc(sizeof(Database_t));
-
-
 	db->table_head = list_new();
 
 	return db;
@@ -22,7 +20,6 @@ int db_open_io(Database_t *db, char *name, enum IOType_e io_type)
 {
 	db->io = io_new();
 	db->io->type = io_type;
-
 	db->iolib = iolib_new();
 
 	switch (db->io->type)
@@ -56,107 +53,6 @@ int db_close_io(Database_t *db)
 	return db->iolib->io_close(db->io, db);
 }
 
-int db_process_io_buffer(Database_t *db, char *buffer, int n)
-{
-	char line[2048];
-	int i;
-	int read;
-
-	read = 0;
-
-	while (1)
-	{
-		memset(line, '\0', 2048);
-		sscanf(buffer + read, "%s\n%n", line, &i);
-
-		read += i;
-
-		__db_process_io_entry(db, line, i);
-
-		if (read == n)
-			break;
-	}
-
-	return 0;
-}
-
-int __db_process_io_entry(Database_t *db, char *entry, int n)
-{
-	int i;
-	int j;
-	int esc;
-	int quote;
-	char *field;
-
-	field = malloc(n * sizeof(char));
-
-	memset(field, '\0', n);
-
-	i = 0;
-	j = 0;
-	esc = 0;
-	quote = 0;
-
-	while (1)
-	{
-		if (esc == 0 && entry[i] == '\\')
-		{
-			esc = 1;
-			i++;
-
-			continue;
-		}
-
-		if (esc == 1)
-		{
-			field[j] = entry[i];
-			esc = 0;
-		}
-
-		if (entry[i] == '"')
-		{
-			if (quote == 0)
-			{
-				quote = 1;
-
-				i++;
-
-				continue;
-			}
-			else
-			{
-				quote = 0;
-
-				i++;
-
-				continue;
-			}
-		}
-
-		if (entry[i] == ';' || entry[i] == '\0')
-		{
-			field[j] = '\0';
-			lprintf(LL_DEBUG, "Parsed field: %s", field);
-
-			j = 0;
-			memset(field, '\0', 256);
-
-			if (entry[i] == '\0')
-			{
-				break;
-			}
-
-			i++;
-
-			continue;
-		}
-
-		field[j++] = entry[i++];
-	}
-
-	return 0;
-}
-
 void db_show_tables(Database_t *db)
 {
 	list_traverse(db->table_head, 0, db_table_show_cb);
@@ -164,12 +60,14 @@ void db_show_tables(Database_t *db)
 
 DBTable_t* db_table_new(Database_t *db, char* name)
 {
-	DBTable_t *dbts;
+	DBTable_t *dbt;
 	int len;
 
-	dbts = malloc(sizeof(DBTable_t));
+	dbt = malloc(sizeof(DBTable_t));
 
-	dbts->data_head = list_new();
+	dbt->cols = 0;
+	dbt->ddef_head = list_new();
+	dbt->data_head = list_new();
 
 	len = strlen(name);
 	if (len > max_table_name_sz - 1)
@@ -179,10 +77,10 @@ DBTable_t* db_table_new(Database_t *db, char* name)
 		return 0;
 	}
 
-	memset(dbts->name, '\0', max_table_name_sz);
-	strncpy(dbts->name, name, len);
+	memset(dbt->name, '\0', max_table_name_sz);
+	strncpy(dbt->name, name, len);
 
-	return dbts;
+	return dbt;
 }
 
 DBDataDef_t* db_datadef_new(char *name, int data_sz)
@@ -236,7 +134,9 @@ DBTable_t* db_table_list_entry(List_t *l)
 
 void db_table_add_datadef(DBTable_t *dbt, DBDataDef_t *dbd)
 {
-	list_add(dbt->data_head, &dbd->ls);
+	list_add(dbt->ddef_head, &dbd->ls);
+
+	dbt->cols++;
 }
 
 int db_table_show_cb(List_t *l, void *ptr)
@@ -250,7 +150,59 @@ int db_table_show_cb(List_t *l, void *ptr)
 	return 0;
 }
 
-int __db_import_csvdata_cb(List_t* l, void* ptr)
+int db_csv_load_defs(Database_t *db, char *csvfile)
+{
+	List_t *csv_head;
+	int r;
+
+	csv_head = list_new();
+
+	db_open_io(db, csvfile, IO_FILEFORMAT);
+	db_load_io(db);
+
+	r = csv_parse(db->io->buffer, db->io->buffer_sz, csv_head);
+	if (r != 0)
+	{
+		lprintf(LL_ERROR, "csv_parse failed");
+
+		return -1;
+	}
+
+	list_traverse(csv_head, db, __db_csv_import_datadef_cb);
+
+	db_close_io(db);
+
+	return 0;
+}
+
+int db_table_csv_fill(Database_t *db, char *tablename, char *csvfile)
+{
+	DBTable_t *dbt;
+	List_t *csv_head;
+	int r;
+
+	csv_head = list_new();
+	dbt = db_get_table(db, tablename);
+
+	db_open_io(db, csvfile, IO_FILEFORMAT);
+	db_load_io(db);
+
+	r = csv_parse(db->io->buffer, db->io->buffer_sz, csv_head);
+	if (r != 0)
+	{
+		lprintf(LL_ERROR, "csv_parse failed");
+
+		return -1;
+	}
+
+	db_close_io(db);
+
+	list_traverse(csv_head, dbt, __db_table_csv_import_data_cb);
+
+	return 0;
+}
+
+int __db_csv_import_datadef_cb(List_t* l, void* ptr)
 {
 	CSVLine_t *csvl;
 	Database_t *db;
@@ -260,7 +212,6 @@ int __db_import_csvdata_cb(List_t* l, void* ptr)
 	db = ptr;
 	csvl = list_get_entry(l, CSVLine_t, ls);
 	
-	/* fields:tablename, dataname, type, length */
 	if (csvl->fc != 4)
 	{
 		lprintf(LL_ERROR, "Wrong number of fields in the csv row (%d)", csvl->fc);
@@ -276,9 +227,49 @@ int __db_import_csvdata_cb(List_t* l, void* ptr)
 		db_add_table(db, dbt);
 	}
 
+	/* fields: 0:tablename, 1:dataname, 2:type, 3:length */
+
 	dbd = db_datadef_new(csvl->fields[1], atoi(csvl->fields[3]));
 
 	db_table_add_datadef(dbt, dbd);
+
+	return 0;
+}
+
+
+int __db_table_csv_import_data_cb(List_t* l, void* ptr)
+{
+	CSVLine_t *csvl;
+	DBTable_t *dbt;
+	DBDataDef_t *ddef;
+	List_t *it;
+	int i;
+
+	dbt = ptr;
+	csvl = list_get_entry(l, CSVLine_t, ls);
+
+	if (csvl->fc != dbt->cols)
+	{
+		lprintf(LL_ERROR, "Field count doesn't match to the table definition (%d <> %d)", csvl->fc, dbt->cols);
+
+		return -1;
+	}
+
+	it = dbt->ddef_head->next;
+	for (i = 0; i < csvl->fc; i++)
+	{
+		if (it == 0)
+		{
+			lprintf(LL_DEBUG, "it is 0");
+			break;
+		}
+
+		ddef = list_get_entry(it, DBDataDef_t, ls);
+
+		lprintf(LL_DEBUG, "def: %s, data: %s", ddef->name, csvl->fields[i]);
+
+		it = it->next;
+	}
 
 	return 0;
 }
